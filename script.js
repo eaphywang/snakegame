@@ -13,6 +13,9 @@ const speedSlider = document.getElementById('speed-slider');
 const speedValue = document.getElementById('speed-value');
 const startScreen = document.getElementById('start-screen');
 const startGameBtn = document.getElementById('start-game-btn');
+const musicToggle = document.getElementById('music-toggle');
+const volumeSlider = document.getElementById('volume-slider');
+const volumeIcon = document.getElementById('volume-icon');
 
 // 游戏状态
 let snake = [];
@@ -24,6 +27,48 @@ let gameInterval;
 let isPaused = false;
 let isGameOver = false;
 let isGameStarted = false;
+
+// 背景音乐实例
+const backgroundMusic = new BackgroundMusic();
+
+// 初始化背景音乐
+function initBackgroundMusic() {
+    backgroundMusic.init();
+    
+    // 设置音乐开关事件监听
+    musicToggle.addEventListener('change', function() {
+        if (this.checked) {
+            backgroundMusic.play();
+        } else {
+            backgroundMusic.pause();
+        }
+    });
+    
+    // 设置音量控制事件监听
+    volumeSlider.addEventListener('input', function() {
+        const volume = this.value / 100;
+        backgroundMusic.setVolume(volume);
+        
+        // 更新音量图标
+        updateVolumeIcon(volume);
+    });
+    
+    // 初始化音量
+    const initialVolume = volumeSlider.value / 100;
+    backgroundMusic.setVolume(initialVolume);
+    updateVolumeIcon(initialVolume);
+}
+
+// 更新音量图标
+function updateVolumeIcon(volume) {
+    if (volume === 0) {
+        volumeIcon.textContent = '🔇';
+    } else if (volume < 0.5) {
+        volumeIcon.textContent = '🔉';
+    } else {
+        volumeIcon.textContent = '🔊';
+    }
+}
 
 // 初始化游戏
 function initGame() {
@@ -272,6 +317,11 @@ function startGame() {
         // 使用当前设置的游戏速度
         updateGameSpeed();
         gameInterval = setInterval(moveSnake, GAME_SPEED);
+        
+        // 如果音乐开关打开，开始播放背景音乐
+        if (musicToggle.checked) {
+            backgroundMusic.play();
+        }
     } else if (isPaused) {
         resumeGame();
     }
@@ -375,6 +425,9 @@ restartButton.addEventListener('click', restartGame);
 document.addEventListener('keydown', handleKeydown);
 speedSlider.addEventListener('input', updateGameSpeed);
 startGameBtn.addEventListener('click', startGame);
+
+// 初始化背景音乐
+initBackgroundMusic();
 
 // 初始化速度值
 updateGameSpeed();
