@@ -11,6 +11,8 @@ const pauseButton = document.getElementById('pause-btn');
 const restartButton = document.getElementById('restart-btn');
 const speedSlider = document.getElementById('speed-slider');
 const speedValue = document.getElementById('speed-value');
+const startScreen = document.getElementById('start-screen');
+const startGameBtn = document.getElementById('start-game-btn');
 
 // 游戏状态
 let snake = [];
@@ -87,16 +89,36 @@ function generateFood() {
 // 绘制游戏
 function draw() {
     // 清空画布
-    ctx.fillStyle = '#222';
+    ctx.fillStyle = '#f5f5f7';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 绘制网格线
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.03)';
+    ctx.lineWidth = 0.5;
+    
+    // 绘制垂直网格线
+    for (let x = 0; x <= canvas.width; x += GRID_SIZE) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+    
+    // 绘制水平网格线
+    for (let y = 0; y <= canvas.height; y += GRID_SIZE) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
     
     // 绘制蛇
     snake.forEach((segment, index) => {
         // 蛇头与身体使用不同颜色
         if (index === 0) {
-            ctx.fillStyle = '#4CAF50'; // 蛇头颜色
+            ctx.fillStyle = '#007AFF'; // 蛇头颜色 - 苹果蓝
         } else {
-            ctx.fillStyle = '#8BC34A'; // 蛇身颜色
+            ctx.fillStyle = '#5AC8FA'; // 蛇身颜色 - 浅蓝色
         }
         
         ctx.fillRect(
@@ -108,7 +130,7 @@ function draw() {
     });
     
     // 绘制食物
-    ctx.fillStyle = '#FF5722';
+    ctx.fillStyle = '#FF3B30'; // 苹果红色
     ctx.fillRect(
         food.x * GRID_SIZE,
         food.y * GRID_SIZE,
@@ -118,17 +140,25 @@ function draw() {
     
     // 如果游戏结束，显示游戏结束文字
     if (isGameOver) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        // 半透明背景
+        ctx.fillStyle = 'rgba(245, 245, 247, 0.85)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        ctx.font = '30px Arial';
-        ctx.fillStyle = 'white';
+        // 游戏结束标题
+        ctx.font = '600 30px -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif';
+        ctx.fillStyle = '#1d1d1f';
         ctx.textAlign = 'center';
-        ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 15);
+        ctx.fillText('游戏结束', canvas.width / 2, canvas.height / 2 - 25);
         
-        ctx.font = '20px Arial';
-        ctx.fillText(`最终得分: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
-        ctx.fillText('按"重新开始"按钮再来一局', canvas.width / 2, canvas.height / 2 + 50);
+        // 分数
+        ctx.font = '500 20px -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif';
+        ctx.fillStyle = '#007AFF';
+        ctx.fillText(`最终得分: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+        
+        // 提示文字
+        ctx.font = '400 16px -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif';
+        ctx.fillStyle = '#86868b';
+        ctx.fillText('按"重新开始"按钮再来一局', canvas.width / 2, canvas.height / 2 + 45);
     }
 }
 
@@ -218,9 +248,26 @@ function gameOver() {
     draw();
 }
 
+// 隐藏开始界面
+function hideStartScreen() {
+    startScreen.style.opacity = '0';
+    setTimeout(() => {
+        startScreen.style.display = 'none';
+    }, 500);
+}
+
+// 显示开始界面
+function showStartScreen() {
+    startScreen.style.display = 'flex';
+    setTimeout(() => {
+        startScreen.style.opacity = '1';
+    }, 10);
+}
+
 // 开始游戏
 function startGame() {
     if (!isGameStarted) {
+        hideStartScreen();
         initGame();
         // 使用当前设置的游戏速度
         updateGameSpeed();
@@ -259,6 +306,7 @@ function restartGame() {
     // 使用当前设置的游戏速度
     updateGameSpeed();
     gameInterval = setInterval(moveSnake, GAME_SPEED);
+    hideStartScreen();
 }
 
 // 键盘事件处理
@@ -326,9 +374,16 @@ pauseButton.addEventListener('click', pauseGame);
 restartButton.addEventListener('click', restartGame);
 document.addEventListener('keydown', handleKeydown);
 speedSlider.addEventListener('input', updateGameSpeed);
+startGameBtn.addEventListener('click', startGame);
 
 // 初始化速度值
 updateGameSpeed();
 
+// 添加CSS过渡效果
+startScreen.style.transition = 'opacity 0.5s ease';
+
 // 初始绘制
 draw();
+
+// 显示开始界面
+showStartScreen();
